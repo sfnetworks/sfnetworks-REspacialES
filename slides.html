@@ -1,0 +1,3327 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introducción al paquete sfnetworks</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Lorena Abad" />
+    <meta name="date" content="2021-01-15" />
+    <script src="libs/header-attrs-2.6/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Introducción al paquete <code>sfnetworks</code>
+## Análisis de redes geoespaciales con R
+### Lorena Abad
+### 2021-01-15
+
+---
+
+class: center, middle, hide-logo
+
+
+
+
+
+
+&lt;STYLE type='text/css' scoped&gt;
+PRE.fansi SPAN {padding-top: .25em; padding-bottom: .25em};
+&lt;/STYLE&gt;
+
+
+
+
+### Primero lo primero...
+
+Encuentran las diapositivas de la presentación aquí: https://sfnetworks.github.io/sfnetworks-REspacialES/slides
+ 
+...
+
+y el código fuente en este repositorio de GitHub: https://github.com/sfnetworks/sfnetworks-REspacialES
+
+---
+class: center, middle, hide-logo
+
+## ¿De qué les voy a hablar hoy?
+
+Redes geoespaciales en R (sinópsis)
+
+Paquete `{sfnetworks}`: origen, filosofía, estructura
+
+Recorrido por las funciones de `{sfnetworks}`, incluyendo:&lt;br&gt;
+  Las funciones base del paquete&lt;br&gt;
+  Nuevas funciones en `{sfnetworks}` v.0.4.1 "Hiltrup"
+
+---
+class: center, middle, hide-logo
+
+## ¿Qué son redes geoespaciales?
+
+.pull-left[
+Redes viales
+![](figs/road_network.png)
+]
+
+.pull-right[
+Redes fluviales
+![](figs/river_network.png)
+]
+---
+class: center, middle, hide-logo
+
+## La oferta en R:
+
+--
+
+.pull-left[
+### Análisis espacial
+
+[\#rspatial](https://twitter.com/search?q=%23rspatial)
+
+`sf`
+
+`stars`
+
+`rgeos`
+
+`rgdal`
+
+`tmap`
+
+`ggmap`
+
+`mapview`
+
+...
+]
+
+.pull-right[
+### Análisis de redes
+
+[statnet](http://statnet.org/)
+
+`igraph`
+
+`tidygraph`
+
+`qgraph`
+
+`ggraph`
+
+`visNetwork`
+
+`networkD3`
+
+...
+]
+
+---
+class: center, middle, hide-logo
+
+# ¿Y para redes espaciales?
+
+--
+
+[dodgr](https://atfutures.github.io/dodgr/) 
+
+[cppRouting](https://github.com/vlarmet/cppRouting)
+
+[shp2graph](https://r-forge.r-project.org/projects/shp2graph)
+
+[spnetwork](https://github.com/edzer/spnetwork)
+
+[stplanr](https://docs.ropensci.org/stplanr/)
+
+...
+
+---
+class: center, middle, hide-logo
+## Nuestra propuesta
+
+--
+.pull-left[
+![](https://user-images.githubusercontent.com/520851/34887433-ce1d130e-f7c6-11e7-83fc-d60ad4fae6bd.gif)
+]
+
+--
+
+.pull-right[
+![:scale 38%](https://raw.githubusercontent.com/thomasp85/tidygraph/master/man/figures/logo.png)
+]
+--
+.center[
+![:scale 20%](https://raw.githubusercontent.com/luukvdmeer/sfnetworks/master/man/figures/logo.png)
+]
+
+---
+class: middle, hide-logo
+
+.pull-left-70[
+.center[
+![:scale 80%](https://github.com/allisonhorst/stats-illustrations/raw/master/rstats-artwork/tidyverse_celestial.png)
+]
+.footnote[
+Arte de [@allison_horst](https://twitter.com/allison_horst)
+]
+]
+
+.pull-right-30[
+### Datos *tidy*
+
+1. Cada variable forma una columna.
+2. Cada observación forma una fila.
+3. Cada unidad observacional forma una tabla.
+
+.footnote[
+Wickham, H. (2014). Tidy Data. Journal of Statistical Software, 59(10), 1 - 23. doi:http://dx.doi.org/10.18637/jss.v059.i10
+]
+
+&lt;br&gt;
+
+- Implementado en los paquetes *tidyverse*
+
+- Permite estructuras concatenables `%&gt;%` 
+
+- Más info en la charla de [REspacialEs aquí!](https://youtu.be/qm_30hOnocg)
+
+]
+
+---
+class: center, middle, hide-logo
+
+.pull-left-70[
+![](https://github.com/allisonhorst/stats-illustrations/raw/master/rstats-artwork/sf.png)
+.footnote[
+Artwork by [@allison_horst](https://twitter.com/allison_horst)
+]
+]
+
+.pull-right-30[
+
+### ** Paquete `sf`**
+
+Simple features para R
+
+Datos espaciales vectorials (puntos, líneas, polígonos)
+
+Compatible con los flujos *tidy* 
+
+Clases S3 
+]
+---
+class: center, middle, hide-logo
+
+.pull-left-70[
+![:scale 80%](https://www.r-graph-gallery.com/314-custom-circle-packing-with-several-levels_files/figure-html/thecode3c-1.png)
+.footnote[
+Figura de [R Graph Gallery](https://www.r-graph-gallery.com/314-custom-circle-packing-with-several-levels.html)
+]
+]
+
+.pull-right-30[
+
+### **Paquete `tidygraph`**
+![:scale 10%](https://avatars3.githubusercontent.com/u/3735184?s=200&amp;v=4)
+ Interfaz con [`igraph`](https://igraph.org/r/)  
+ 
+![:scale 8%](https://github.com/tidyverse/dplyr/raw/master/man/figures/logo.png)
+ Soporte para *verbos* [`dplyr`](https://dplyr.tidyverse.org/) 
+
+![:scale 8%](https://raw.githubusercontent.com/thomasp85/tidygraph/master/man/figures/logo.png)
+ Introduce nuevos *verbos* específicos para datos de redes (e.g. `morph`, `bind_graphs`, `graph_join`)
+
+![:scale 8%](https://github.com/thomasp85/ggraph/raw/master/man/figures/logo.png)
+ Permite visualizción a través de  [`ggraph`](https://ggraph.data-imaginist.com/)
+]
+---
+class: center, middle
+# ¿Y `sfnetworks`?
+
+--
+
+### Filosofía
+  
+De la introducción de `tidygraph`: 
+  
+  &gt; "... una cercana aproximación de datos *ordenados* para datos relacionales son dos *tidy data frames*, uno que describa los *nodos* y otro describiendo las *aristas*."
+
+--
+  
+  &lt;br&gt;
+  &lt;br&gt;
+  
+  &gt; “Una cercana aproximación de datos *ordenados* para datos relacionales .orange[*geoespaciales*] son dos .orange[*objectos sf*], uno que describa los *nodos* y otro describiendo las *aristas*”
+
+adaptación para `sfnetworks`.
+
+---
+class: middle
+## Instalación
+
+Instalación estable desde GitHub en la rama `master`: 
+  
+  
+  ```r
+  remotes::install_github("luukvdmeer/sfnetworks")
+  ```
+
+Instalación de la rama `develop` donde desarrollamos activamente el paquete y PR pueden ser dirigidas: 
+  
+  
+  ```r
+  remotes::install_github("luukvdmeer/sfnetworks", ref = "develop")
+  ```
+---
+class: middle
+## Estructura de la clase `sfnetwork`
+
+### Construcción
+  
+Nodos: objeto `sf` con geometrías `POINT`
+
+Aristas: Columnas *to*, *from* y coordenadas de borde.
+
+Mismo sistema de coordenas!
+  
+---
+count: false
+ 
+### Construcción
+.left-panel-toyexample-user[
+
+```r
+*library(sf)
+*library(sfnetworks)
+
+*p1 = st_point(c(7, 51))
+*p2 = st_point(c(7, 52))
+*p3 = st_point(c(8, 52))
+
+*st_sfc(
+* p1, p2, p3,
+* crs = 4326
+*) %&gt;% st_sf()
+```
+]
+ 
+.right-panel-toyexample-user[
+
+```
+Simple feature collection with 3 features and 0 fields
+geometry type:  POINT
+dimension:      XY
+bbox:           xmin: 7 ymin: 51 xmax: 8 ymax: 52
+geographic CRS: WGS 84
+      geometry
+1 POINT (7 51)
+2 POINT (7 52)
+3 POINT (8 52)
+```
+]
+
+---
+count: false
+ 
+### Construcción
+.left-panel-toyexample-user[
+
+```r
+library(sf)  
+library(sfnetworks)  
+
+p1 = st_point(c(7, 51))  
+p2 = st_point(c(7, 52))  
+p3 = st_point(c(8, 52))  
+
+st_sfc(  
+  p1, p2, p3,  
+  crs = 4326  
+) %&gt;% st_sf() -&gt;  
+* nodes
+```
+]
+ 
+.right-panel-toyexample-user[
+
+]
+
+---
+count: false
+ 
+### Construcción
+.left-panel-toyexample-user[
+
+```r
+library(sf)  
+library(sfnetworks)  
+
+p1 = st_point(c(7, 51))  
+p2 = st_point(c(7, 52))  
+p3 = st_point(c(8, 52))  
+
+st_sfc(  
+  p1, p2, p3,  
+  crs = 4326  
+) %&gt;% st_sf() -&gt;  
+  nodes  
+
+*st_sfc(
+* st_cast(st_union(p1,p2), "LINESTRING"),
+* st_cast(st_union(p1,p3), "LINESTRING"),
+* st_cast(st_union(p2,p3), "LINESTRING"),
+* crs = 4326
+*) %&gt;% st_sf()
+```
+]
+ 
+.right-panel-toyexample-user[
+
+```
+Simple feature collection with 3 features and 0 fields
+geometry type:  LINESTRING
+dimension:      XY
+bbox:           xmin: 7 ymin: 51 xmax: 8 ymax: 52
+geographic CRS: WGS 84
+                 geometry
+1 LINESTRING (7 51, 7 52)
+2 LINESTRING (7 51, 8 52)
+3 LINESTRING (7 52, 8 52)
+```
+]
+
+---
+count: false
+ 
+### Construcción
+.left-panel-toyexample-user[
+
+```r
+library(sf)  
+library(sfnetworks)  
+
+p1 = st_point(c(7, 51))  
+p2 = st_point(c(7, 52))  
+p3 = st_point(c(8, 52))  
+
+st_sfc(  
+  p1, p2, p3,  
+  crs = 4326  
+) %&gt;% st_sf() -&gt;  
+  nodes  
+
+st_sfc(  
+  st_cast(st_union(p1,p2), "LINESTRING"),  
+  st_cast(st_union(p1,p3), "LINESTRING"),  
+  st_cast(st_union(p2,p3), "LINESTRING"),  
+  crs = 4326  
+) %&gt;% st_sf() -&gt;  
+* edges
+```
+]
+ 
+.right-panel-toyexample-user[
+
+]
+
+---
+count: false
+ 
+### Construcción
+.left-panel-toyexample-user[
+
+```r
+library(sf)  
+library(sfnetworks)  
+
+p1 = st_point(c(7, 51))  
+p2 = st_point(c(7, 52))  
+p3 = st_point(c(8, 52))  
+
+st_sfc(  
+  p1, p2, p3,  
+  crs = 4326  
+) %&gt;% st_sf() -&gt;  
+  nodes  
+
+st_sfc(  
+  st_cast(st_union(p1,p2), "LINESTRING"),  
+  st_cast(st_union(p1,p3), "LINESTRING"),  
+  st_cast(st_union(p2,p3), "LINESTRING"),  
+  crs = 4326  
+) %&gt;% st_sf() -&gt;  
+  edges  
+
+*edges$from = c(1, 1, 2)
+*edges$to = c(2, 3, 3)
+```
+]
+ 
+.right-panel-toyexample-user[
+
+]
+
+---
+count: false
+ 
+### Construcción
+.left-panel-toyexample-user[
+
+```r
+library(sf)  
+library(sfnetworks)  
+
+p1 = st_point(c(7, 51))  
+p2 = st_point(c(7, 52))  
+p3 = st_point(c(8, 52))  
+
+st_sfc(  
+  p1, p2, p3,  
+  crs = 4326  
+) %&gt;% st_sf() -&gt;  
+  nodes  
+
+st_sfc(  
+  st_cast(st_union(p1,p2), "LINESTRING"),  
+  st_cast(st_union(p1,p3), "LINESTRING"),  
+  st_cast(st_union(p2,p3), "LINESTRING"),  
+  crs = 4326  
+) %&gt;% st_sf() -&gt;  
+  edges  
+
+edges$from = c(1, 1, 2)  
+edges$to = c(2, 3, 3)  
+
+*sfnetwork(nodes, edges, directed = FALSE)
+```
+]
+ 
+.right-panel-toyexample-user[
+
+```
+Checking if spatial network structure is valid...
+```
+
+```
+Spatial network structure is valid
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;&lt;span style='color: #555555;'&gt;# A sfnetwork with&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;nodes and&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;edges
+#
+# CRS: &lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;EPSG:4326&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;
+#
+# An undirected simple graph with 1 component with spatially explicit edges
+#
+# Node Data:     3 x 1 (active)&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Geometry type: POINT&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Dimension:     XY&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Bounding box:  xmin: 7 ymin: 51 xmax: 8 ymax: 52&lt;/span&gt;&lt;span&gt;
+     geometry
+  &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;POINT [°]&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;1&lt;/span&gt;&lt;span&gt;      (7 51)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;2&lt;/span&gt;&lt;span&gt;      (7 52)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt;      (8 52)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;#
+# Edge Data:     3 x 3&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Geometry type: LINESTRING&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Dimension:     XY&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Bounding box:  xmin: 7 ymin: 51 xmax: 8 ymax: 52&lt;/span&gt;&lt;span&gt;
+   from    to         geometry
+  &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;LINESTRING [°]&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;1&lt;/span&gt;&lt;span&gt;     1     2     (7 51, 7 52)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;2&lt;/span&gt;&lt;span&gt;     1     3     (7 51, 8 52)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt;     2     3     (7 52, 8 52)
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+]
+
+---
+count: false
+ 
+### Construcción
+.left-panel-toyexample-user[
+
+```r
+library(sf)  
+library(sfnetworks)  
+
+p1 = st_point(c(7, 51))  
+p2 = st_point(c(7, 52))  
+p3 = st_point(c(8, 52))  
+
+st_sfc(  
+  p1, p2, p3,  
+  crs = 4326  
+) %&gt;% st_sf() -&gt;  
+  nodes  
+
+st_sfc(  
+  st_cast(st_union(p1,p2), "LINESTRING"),  
+  st_cast(st_union(p1,p3), "LINESTRING"),  
+  st_cast(st_union(p2,p3), "LINESTRING"),  
+  crs = 4326  
+) %&gt;% st_sf() -&gt;  
+  edges  
+
+edges$from = c(1, 1, 2)  
+edges$to = c(2, 3, 3)  
+
+sfnetwork(nodes, edges, directed = FALSE) -&gt;  
+* net
+```
+]
+ 
+.right-panel-toyexample-user[
+
+```
+Checking if spatial network structure is valid...
+```
+
+```
+Spatial network structure is valid
+```
+]
+
+---
+count: false
+ 
+### Construcción
+.left-panel-toyexample-user[
+
+```r
+library(sf)  
+library(sfnetworks)  
+
+p1 = st_point(c(7, 51))  
+p2 = st_point(c(7, 52))  
+p3 = st_point(c(8, 52))  
+
+st_sfc(  
+  p1, p2, p3,  
+  crs = 4326  
+) %&gt;% st_sf() -&gt;  
+  nodes  
+
+st_sfc(  
+  st_cast(st_union(p1,p2), "LINESTRING"),  
+  st_cast(st_union(p1,p3), "LINESTRING"),  
+  st_cast(st_union(p2,p3), "LINESTRING"),  
+  crs = 4326  
+) %&gt;% st_sf() -&gt;  
+  edges  
+
+edges$from = c(1, 1, 2)  
+edges$to = c(2, 3, 3)  
+
+sfnetwork(nodes, edges, directed = FALSE) -&gt;  
+  net  
+
+*class(net)
+```
+]
+ 
+.right-panel-toyexample-user[
+
+```
+Checking if spatial network structure is valid...
+```
+
+```
+Spatial network structure is valid
+```
+
+```
+[1] "sfnetwork" "tbl_graph" "igraph"   
+```
+]
+
+&lt;style&gt;
+.left-panel-toyexample-user {
+  color: #777;
+  width: 38.6138613861386%;
+  height: 92%;
+  float: left;
+  font-size: 80%
+}
+.right-panel-toyexample-user {
+  width: 59.4059405940594%;
+  float: right;
+  padding-left: 1%;
+  font-size: 80%
+}
+.middle-panel-toyexample-user {
+  width: 0%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+---
+count: false
+ 
+### Tip extra!
+.left-panel-toyexamplename-user[
+
+```r
+*nodes$name = c("city", "village", "farm")
+*edges$from = c("city", "city", "village")
+*edges$to = c("village", "farm", "farm")
+```
+]
+ 
+.right-panel-toyexamplename-user[
+
+]
+
+---
+count: false
+ 
+### Tip extra!
+.left-panel-toyexamplename-user[
+
+```r
+nodes$name = c("city", "village", "farm")  
+edges$from = c("city", "city", "village")  
+edges$to = c("village", "farm", "farm")  
+
+*sfnetwork(nodes, edges, node_key = "name")
+```
+]
+ 
+.right-panel-toyexamplename-user[
+
+```
+Checking if spatial network structure is valid...
+```
+
+```
+Spatial network structure is valid
+```
+
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;&lt;span style='color: #555555;'&gt;# A sfnetwork with&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;nodes and&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;edges
+#
+# CRS: &lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;EPSG:4326&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;
+#
+# A directed acyclic simple graph with 1 component with spatially explicit edges
+#
+# Node Data:     3 x 2 (active)&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Geometry type: POINT&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Dimension:     XY&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Bounding box:  xmin: 7 ymin: 51 xmax: 8 ymax: 52&lt;/span&gt;&lt;span&gt;
+     geometry name   
+  &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;POINT [°]&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;1&lt;/span&gt;&lt;span&gt;      (7 51) city   
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;2&lt;/span&gt;&lt;span&gt;      (7 52) village
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt;      (8 52) farm   
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;#
+# Edge Data:     3 x 3&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Geometry type: LINESTRING&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Dimension:     XY&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Bounding box:  xmin: 7 ymin: 51 xmax: 8 ymax: 52&lt;/span&gt;&lt;span&gt;
+   from    to         geometry
+  &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;LINESTRING [°]&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;1&lt;/span&gt;&lt;span&gt;     1     2     (7 51, 7 52)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;2&lt;/span&gt;&lt;span&gt;     1     3     (7 51, 8 52)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt;     2     3     (7 52, 8 52)
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+]
+
+&lt;style&gt;
+.left-panel-toyexamplename-user {
+  color: #777;
+  width: 38.6138613861386%;
+  height: 92%;
+  float: left;
+  font-size: 80%
+}
+.right-panel-toyexamplename-user {
+  width: 59.4059405940594%;
+  float: right;
+  padding-left: 1%;
+  font-size: 80%
+}
+.middle-panel-toyexamplename-user {
+  width: 0%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+---
+class: middle
+## Estructura de la clase `sfnetwork`
+
+### Conversión
+  
+Usando `as_sfnetwork()` se pueden pasar objetos de tipo:
+- `sf` con geometría `POINT` o `LINESTRING`
+- `tbl_graph` de `tidygraph`
+- `psp` o `linnet` de `spatstat`
+- `sfNetwork` de `stplanr`
+
+--
+
+Archivos externos que se puedan leer con: 
+- `sf::st_read()`
+- `igraph::read_graph() %&gt;% as_tbl_graph()` 
+
+---
+#### Demo: Librerías
+
+
+```r
+library(sf)
+library(sfnetworks)
+library(tidygraph)
+library(tidyverse)
+
+# Extras:
+library(ggplot2) 
+```
+
+---
+#### Demo: Datos
+
+.center[
+&lt;img src="slides_files/figure-html/demo2-1.png" width="864" /&gt;
+]
+
+---
+#### Demo: Datos
+
+.center[
+&lt;img src="slides_files/figure-html/demo3-1.png" width="864" /&gt;
+]
+
+---
+count: false
+ 
+#### Demo: Conversión
+.left-panel-demo4-rotate[
+
+```r
+cuenca %&gt;%  
+  head()   
+```
+]
+ 
+.right-panel-demo4-rotate[
+
+```
+Simple feature collection with 6 features and 6 fields
+geometry type:  LINESTRING
+dimension:      XY
+bbox:           xmin: -79.03314 ymin: -2.906555 xmax: -78.95973 ymax: -2.888646
+geographic CRS: WGS 84
+                     name        type lanes oneway sidewalk  surface
+1                    &lt;NA&gt; residential  &lt;NA&gt;     no     &lt;NA&gt;     &lt;NA&gt;
+2                    &lt;NA&gt;  trunk_link     1    yes    right  asphalt
+3           Juan Montalvo residential     2    yes     both     sett
+4          Miguel Heredia residential     2    yes     both concrete
+5            Miguel Velez residential     2    yes     both concrete
+6 Avenida de las Américas     primary     2    yes     &lt;NA&gt;  asphalt
+                        geometry
+1 LINESTRING (-79.028 -2.9061...
+2 LINESTRING (-78.95973 -2.89...
+3 LINESTRING (-79.00801 -2.89...
+4 LINESTRING (-79.01274 -2.89...
+5 LINESTRING (-79.01104 -2.89...
+6 LINESTRING (-79.03314 -2.90...
+```
+]
+
+---
+count: false
+ 
+#### Demo: Conversión
+.left-panel-demo4-rotate[
+
+```r
+cuenca %&gt;%  
+* as_sfnetwork()
+```
+]
+ 
+.right-panel-demo4-rotate[
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;&lt;span style='color: #555555;'&gt;# A sfnetwork with&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;12283&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;nodes and&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;8999&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;edges
+#
+# CRS: &lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;EPSG:4326&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;
+#
+# A directed multigraph with 3646 components with spatially explicit edges
+#
+# Node Data:     12,283 x 1 (active)&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Geometry type: POINT&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Dimension:     XY&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Bounding box:  xmin: -79.0708 ymin: -2.935008 xmax: -78.91145 ymax:
+#   -2.833441&lt;/span&gt;&lt;span&gt;
+               geometry
+            &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;POINT [°]&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;1&lt;/span&gt;&lt;span&gt;   (-79.028 -2.906154)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;2&lt;/span&gt;&lt;span&gt;  (-79.02803 -2.90633)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt; (-78.95973 -2.893506)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;4&lt;/span&gt;&lt;span&gt; (-78.96173 -2.893512)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;5&lt;/span&gt;&lt;span&gt; (-79.00801 -2.891764)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;6&lt;/span&gt;&lt;span&gt;  (-79.00924 -2.89848)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# ... with 12,277 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;#
+# Edge Data:     8,999 x 9&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Geometry type: LINESTRING&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Dimension:     XY&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Bounding box:  xmin: -79.08642 ymin: -2.960194 xmax: -78.90349
+#   ymax: -2.779669&lt;/span&gt;&lt;span&gt;
+   from    to name  type  lanes oneway sidewalk surface
+  &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;1&lt;/span&gt;&lt;span&gt;     1     2 &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;    resi~ &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;    no     &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;       &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;     
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;2&lt;/span&gt;&lt;span&gt;     3     4 &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;    trun~ 1     yes    right    asphalt
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt;     5     6 Juan~ resi~ 2     yes    both     sett   
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# ... with 8,996 more rows, and 1 more variable: geometry &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;LINESTRING&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;  [°]&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+]
+
+&lt;style&gt;
+.left-panel-demo4-rotate {
+  color: #777;
+  width: 32.0388349514563%;
+  height: 92%;
+  float: left;
+  font-size: 80%
+}
+.right-panel-demo4-rotate {
+  width: 66.0194174757282%;
+  float: right;
+  padding-left: 1%;
+  font-size: 80%
+}
+.middle-panel-demo4-rotate {
+  width: 0%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+---
+count: false
+ 
+#### Demo: Conversión
+.left-panel-demo5-non_seq[
+
+```r
+cuenca %&gt;%  
+  as_sfnetwork(  
+  )  
+```
+]
+ 
+.right-panel-demo5-non_seq[
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;&lt;span style='color: #555555;'&gt;# A sfnetwork with&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;12283&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;nodes and&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;8999&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;edges
+#
+# CRS: &lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;EPSG:4326&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;
+#
+# A directed multigraph with 3646 components with spatially explicit edges
+#
+# Node Data:     12,283 x 1 (active)&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Geometry type: POINT&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Dimension:     XY&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Bounding box:  xmin: -79.0708 ymin: -2.935008 xmax: -78.91145 ymax:
+#   -2.833441&lt;/span&gt;&lt;span&gt;
+               geometry
+            &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;POINT [°]&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;1&lt;/span&gt;&lt;span&gt;   (-79.028 -2.906154)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;2&lt;/span&gt;&lt;span&gt;  (-79.02803 -2.90633)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt; (-78.95973 -2.893506)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;4&lt;/span&gt;&lt;span&gt; (-78.96173 -2.893512)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;5&lt;/span&gt;&lt;span&gt; (-79.00801 -2.891764)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;6&lt;/span&gt;&lt;span&gt;  (-79.00924 -2.89848)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# ... with 12,277 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;#
+# Edge Data:     8,999 x 9&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Geometry type: LINESTRING&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Dimension:     XY&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Bounding box:  xmin: -79.08642 ymin: -2.960194 xmax: -78.90349
+#   ymax: -2.779669&lt;/span&gt;&lt;span&gt;
+   from    to name  type  lanes oneway sidewalk surface
+  &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;1&lt;/span&gt;&lt;span&gt;     1     2 &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;    resi~ &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;    no     &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;       &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;     
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;2&lt;/span&gt;&lt;span&gt;     3     4 &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;    trun~ 1     yes    right    asphalt
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt;     5     6 Juan~ resi~ 2     yes    both     sett   
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# ... with 8,996 more rows, and 1 more variable: geometry &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;LINESTRING&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;  [°]&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+]
+
+---
+count: false
+ 
+#### Demo: Conversión
+.left-panel-demo5-non_seq[
+
+```r
+cuenca %&gt;%  
+  as_sfnetwork(  
+*   directed = F,
+  )  
+```
+]
+ 
+.right-panel-demo5-non_seq[
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;&lt;span style='color: #555555;'&gt;# A sfnetwork with&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;12283&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;nodes and&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;8999&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;edges
+#
+# CRS: &lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;EPSG:4326&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;
+#
+# An undirected multigraph with 3646 components with spatially explicit edges
+#
+# Node Data:     12,283 x 1 (active)&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Geometry type: POINT&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Dimension:     XY&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Bounding box:  xmin: -79.0708 ymin: -2.935008 xmax: -78.91145 ymax:
+#   -2.833441&lt;/span&gt;&lt;span&gt;
+               geometry
+            &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;POINT [°]&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;1&lt;/span&gt;&lt;span&gt;   (-79.028 -2.906154)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;2&lt;/span&gt;&lt;span&gt;  (-79.02803 -2.90633)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt; (-78.95973 -2.893506)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;4&lt;/span&gt;&lt;span&gt; (-78.96173 -2.893512)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;5&lt;/span&gt;&lt;span&gt; (-79.00801 -2.891764)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;6&lt;/span&gt;&lt;span&gt;  (-79.00924 -2.89848)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# ... with 12,277 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;#
+# Edge Data:     8,999 x 9&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Geometry type: LINESTRING&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Dimension:     XY&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Bounding box:  xmin: -79.08642 ymin: -2.960194 xmax: -78.90349
+#   ymax: -2.779669&lt;/span&gt;&lt;span&gt;
+   from    to name  type  lanes oneway sidewalk surface
+  &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;1&lt;/span&gt;&lt;span&gt;     1     2 &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;    resi~ &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;    no     &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;       &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;     
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;2&lt;/span&gt;&lt;span&gt;     3     4 &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;    trun~ 1     yes    right    asphalt
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt;     5     6 Juan~ resi~ 2     yes    both     sett   
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# ... with 8,996 more rows, and 1 more variable: geometry &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;LINESTRING&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;  [°]&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+]
+
+---
+count: false
+ 
+#### Demo: Conversión
+.left-panel-demo5-non_seq[
+
+```r
+cuenca %&gt;%  
+  as_sfnetwork(  
+    directed = F,  
+*   edges_as_lines = F
+  )  
+```
+]
+ 
+.right-panel-demo5-non_seq[
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;&lt;span style='color: #555555;'&gt;# A sfnetwork with&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;12283&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;nodes and&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;8999&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;edges
+#
+# CRS: &lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;EPSG:4326&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;
+#
+# An undirected multigraph with 3646 components with spatially implicit edges
+#
+# Node Data:     12,283 x 1 (active)&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Geometry type: POINT&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Dimension:     XY&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Bounding box:  xmin: -79.0708 ymin: -2.935008 xmax: -78.91145 ymax:
+#   -2.833441&lt;/span&gt;&lt;span&gt;
+               geometry
+            &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;POINT [°]&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;1&lt;/span&gt;&lt;span&gt;   (-79.028 -2.906154)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;2&lt;/span&gt;&lt;span&gt;  (-79.02803 -2.90633)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt; (-78.95973 -2.893506)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;4&lt;/span&gt;&lt;span&gt; (-78.96173 -2.893512)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;5&lt;/span&gt;&lt;span&gt; (-79.00801 -2.891764)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;6&lt;/span&gt;&lt;span&gt;  (-79.00924 -2.89848)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# ... with 12,277 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;#
+# Edge Data: 8,999 x 8&lt;/span&gt;&lt;span&gt;
+   from    to name          type        lanes oneway sidewalk surface
+  &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;         &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;       &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;1&lt;/span&gt;&lt;span&gt;     1     2 &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;            residential &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;    no     &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;       &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;     
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;2&lt;/span&gt;&lt;span&gt;     3     4 &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;            trunk_link  1     yes    right    asphalt
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt;     5     6 Juan Montalvo residential 2     yes    both     sett   
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# ... with 8,996 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+]
+
+---
+count: false
+ 
+#### Demo: Conversión
+.left-panel-demo5-non_seq[
+
+```r
+cuenca %&gt;%  
+  as_sfnetwork(  
+    directed = F,  
+    edges_as_lines = F  
+  )  
+
+*net = as_sfnetwork(cuenca, directed = F)
+```
+]
+ 
+.right-panel-demo5-non_seq[
+&lt;PRE class="fansi fansi-output"&gt;&lt;CODE&gt;&lt;span style='color: #555555;'&gt;# A sfnetwork with&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;12283&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;nodes and&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;8999&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;edges
+#
+# CRS: &lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;EPSG:4326&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;'&gt;
+#
+# An undirected multigraph with 3646 components with spatially implicit edges
+#
+# Node Data:     12,283 x 1 (active)&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Geometry type: POINT&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Dimension:     XY&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# Bounding box:  xmin: -79.0708 ymin: -2.935008 xmax: -78.91145 ymax:
+#   -2.833441&lt;/span&gt;&lt;span&gt;
+               geometry
+            &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;POINT [°]&amp;gt;&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;1&lt;/span&gt;&lt;span&gt;   (-79.028 -2.906154)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;2&lt;/span&gt;&lt;span&gt;  (-79.02803 -2.90633)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt; (-78.95973 -2.893506)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;4&lt;/span&gt;&lt;span&gt; (-78.96173 -2.893512)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;5&lt;/span&gt;&lt;span&gt; (-79.00801 -2.891764)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;6&lt;/span&gt;&lt;span&gt;  (-79.00924 -2.89848)
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# ... with 12,277 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;#
+# Edge Data: 8,999 x 8&lt;/span&gt;&lt;span&gt;
+   from    to name          type        lanes oneway sidewalk surface
+  &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;int&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;         &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;       &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt; &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;    &lt;/span&gt;&lt;span style='color: #555555;font-style: italic;'&gt;&amp;lt;chr&amp;gt;&lt;/span&gt;&lt;span&gt;  
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;1&lt;/span&gt;&lt;span&gt;     1     2 &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;            residential &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;    no     &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;       &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;     
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;2&lt;/span&gt;&lt;span&gt;     3     4 &lt;/span&gt;&lt;span style='color: #BB0000;'&gt;NA&lt;/span&gt;&lt;span&gt;            trunk_link  1     yes    right    asphalt
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;3&lt;/span&gt;&lt;span&gt;     5     6 Juan Montalvo residential 2     yes    both     sett   
+&lt;/span&gt;&lt;span style='color: #555555;'&gt;# ... with 8,996 more rows&lt;/span&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/CODE&gt;&lt;/PRE&gt;
+]
+
+&lt;style&gt;
+.left-panel-demo5-non_seq {
+  color: #777;
+  width: 32.0388349514563%;
+  height: 92%;
+  float: left;
+  font-size: 80%
+}
+.right-panel-demo5-non_seq {
+  width: 66.0194174757282%;
+  float: right;
+  padding-left: 1%;
+  font-size: 80%
+}
+.middle-panel-demo5-non_seq {
+  width: 0%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+---
+count: false
+ 
+#### Demo: Visualización
+.left-panel-demo6-user[
+
+```r
+*par(mar = c(0,0,0,0))
+```
+]
+ 
+.right-panel-demo6-user[
+
+]
+
+---
+count: false
+ 
+#### Demo: Visualización
+.left-panel-demo6-user[
+
+```r
+par(mar = c(0,0,0,0))  
+*plot(net)
+```
+]
+ 
+.right-panel-demo6-user[
+&lt;img src="slides_files/figure-html/demo6_user_2_output-1.png" width="864" /&gt;
+]
+
+&lt;style&gt;
+.left-panel-demo6-user {
+  color: #777;
+  width: 38.6138613861386%;
+  height: 92%;
+  float: left;
+  font-size: 80%
+}
+.right-panel-demo6-user {
+  width: 59.4059405940594%;
+  float: right;
+  padding-left: 1%;
+  font-size: 80%
+}
+.middle-panel-demo6-user {
+  width: 0%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+---
+count: false
+ 
+#### Demo: Visualización
+.left-panel-demo7-user[
+
+```r
+*autoplot(net)
+```
+]
+ 
+.right-panel-demo7-user[
+&lt;img src="slides_files/figure-html/demo7_user_1_output-1.png" width="864" /&gt;
+]
+
+---
+count: false
+ 
+#### Demo: Visualización
+.left-panel-demo7-user[
+
+```r
+autoplot(net) +  
+* ggtitle("Red vial de Cuenca, Ecuador")
+```
+]
+ 
+.right-panel-demo7-user[
+&lt;img src="slides_files/figure-html/demo7_user_2_output-1.png" width="864" /&gt;
+]
+
+&lt;style&gt;
+.left-panel-demo7-user {
+  color: #777;
+  width: 38.6138613861386%;
+  height: 92%;
+  float: left;
+  font-size: 80%
+}
+.right-panel-demo7-user {
+  width: 59.4059405940594%;
+  float: right;
+  padding-left: 1%;
+  font-size: 80%
+}
+.middle-panel-demo7-user {
+  width: 0%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+.note[[Issue en ggraph](https://github.com/thomasp85/ggraph/issues/275)]
+
+---
+count: false
+ 
+#### Demo: Wrangling
+.left-panel-demo8-user[
+
+```r
+# Con verbos de `dplyr`
+*net
+```
+]
+ 
+.right-panel-demo8-user[
+
+```
+# A sfnetwork with 12283 nodes and 8999 edges
+#
+# CRS:  EPSG:4326 
+#
+# An undirected multigraph with 3646 components with spatially explicit edges
+#
+# Node Data:     12,283 x 1 (active)
+# Geometry type: POINT
+# Dimension:     XY
+# Bounding box:  xmin: -79.0708 ymin: -2.935008 xmax: -78.91145 ymax:
+#   -2.833441
+               geometry
+            &lt;POINT [°]&gt;
+1   (-79.028 -2.906154)
+2  (-79.02803 -2.90633)
+3 (-78.95973 -2.893506)
+4 (-78.96173 -2.893512)
+5 (-79.00801 -2.891764)
+6  (-79.00924 -2.89848)
+# ... with 12,277 more rows
+#
+# Edge Data:     8,999 x 9
+# Geometry type: LINESTRING
+# Dimension:     XY
+# Bounding box:  xmin: -79.08642 ymin: -2.960194 xmax: -78.90349
+#   ymax: -2.779669
+   from    to name  type  lanes oneway sidewalk surface
+  &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;  
+1     1     2 &lt;NA&gt;  resi~ &lt;NA&gt;  no     &lt;NA&gt;     &lt;NA&gt;   
+2     3     4 &lt;NA&gt;  trun~ 1     yes    right    asphalt
+3     5     6 Juan~ resi~ 2     yes    both     sett   
+# ... with 8,996 more rows, and 1 more variable: geometry &lt;LINESTRING
+#   [°]&gt;
+```
+]
+
+---
+count: false
+ 
+#### Demo: Wrangling
+.left-panel-demo8-user[
+
+```r
+# Con verbos de `dplyr`
+net %&gt;%  
+* activate("edges")
+```
+]
+ 
+.right-panel-demo8-user[
+
+```
+# A sfnetwork with 12283 nodes and 8999 edges
+#
+# CRS:  EPSG:4326 
+#
+# An undirected multigraph with 3646 components with spatially explicit edges
+#
+# Edge Data:     8,999 x 9 (active)
+# Geometry type: LINESTRING
+# Dimension:     XY
+# Bounding box:  xmin: -79.08642 ymin: -2.960194 xmax: -78.90349
+#   ymax: -2.779669
+   from    to name  type  lanes oneway sidewalk surface
+  &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;  
+1     1     2 &lt;NA&gt;  resi~ &lt;NA&gt;  no     &lt;NA&gt;     &lt;NA&gt;   
+2     3     4 &lt;NA&gt;  trun~ 1     yes    right    asphalt
+3     5     6 Juan~ resi~ 2     yes    both     sett   
+4     7     8 Migu~ resi~ 2     yes    both     concre~
+5     9    10 Migu~ resi~ 2     yes    both     concre~
+6    11    12 Aven~ prim~ 2     yes    &lt;NA&gt;     asphalt
+# ... with 8,993 more rows, and 1 more variable: geometry &lt;LINESTRING
+#   [°]&gt;
+#
+# Node Data:     12,283 x 1
+# Geometry type: POINT
+# Dimension:     XY
+# Bounding box:  xmin: -79.0708 ymin: -2.935008 xmax: -78.91145 ymax:
+#   -2.833441
+               geometry
+            &lt;POINT [°]&gt;
+1   (-79.028 -2.906154)
+2  (-79.02803 -2.90633)
+3 (-78.95973 -2.893506)
+# ... with 12,280 more rows
+```
+]
+
+---
+count: false
+ 
+#### Demo: Wrangling
+.left-panel-demo8-user[
+
+```r
+# Con verbos de `dplyr`
+net %&gt;%  
+  activate("edges") %&gt;%  
+* filter(type == "residential")
+```
+]
+ 
+.right-panel-demo8-user[
+
+```
+# A sfnetwork with 12283 nodes and 4434 edges
+#
+# CRS:  EPSG:4326 
+#
+# An undirected multigraph with 7890 components with spatially explicit edges
+#
+# Edge Data:     4,434 x 9 (active)
+# Geometry type: LINESTRING
+# Dimension:     XY
+# Bounding box:  xmin: -79.07054 ymin: -2.933674 xmax: -78.91342
+#   ymax: -2.83815
+   from    to name  type  lanes oneway sidewalk surface
+  &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;  
+1     1     2 &lt;NA&gt;  resi~ &lt;NA&gt;  no     &lt;NA&gt;     &lt;NA&gt;   
+2     5     6 Juan~ resi~ 2     yes    both     sett   
+3     7     8 Migu~ resi~ 2     yes    both     concre~
+4     9    10 Migu~ resi~ 2     yes    both     concre~
+5    13    14 Cant~ resi~ 2     &lt;NA&gt;   right    concre~
+6    23    24 Moll~ resi~ 1     yes    right    asphalt
+# ... with 4,428 more rows, and 1 more variable: geometry &lt;LINESTRING
+#   [°]&gt;
+#
+# Node Data:     12,283 x 1
+# Geometry type: POINT
+# Dimension:     XY
+# Bounding box:  xmin: -79.0708 ymin: -2.935008 xmax: -78.91145 ymax:
+#   -2.833441
+               geometry
+            &lt;POINT [°]&gt;
+1   (-79.028 -2.906154)
+2  (-79.02803 -2.90633)
+3 (-78.95973 -2.893506)
+# ... with 12,280 more rows
+```
+]
+
+&lt;style&gt;
+.left-panel-demo8-user {
+  color: #777;
+  width: 38.6138613861386%;
+  height: 92%;
+  float: left;
+  font-size: 80%
+}
+.right-panel-demo8-user {
+  width: 59.4059405940594%;
+  float: right;
+  padding-left: 1%;
+  font-size: 80%
+}
+.middle-panel-demo8-user {
+  width: 0%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+---
+count: false
+ 
+#### Demo: Wrangling
+.left-panel-demo9-user[
+
+```r
+*par(mar = c(0,0,0,0), mfrow = c(2,1))
+*plot(net, col = 'grey')
+```
+]
+ 
+.right-panel-demo9-user[
+&lt;img src="slides_files/figure-html/demo9_user_1_output-1.png" width="864" /&gt;
+]
+
+---
+count: false
+ 
+#### Demo: Wrangling
+.left-panel-demo9-user[
+
+```r
+par(mar = c(0,0,0,0), mfrow = c(2,1))  
+plot(net, col = 'grey')  
+*plot(
+* sansebas,
+* border = 'red', lwd = 2,
+* col = NA, add = T
+*) 
+```
+]
+ 
+.right-panel-demo9-user[
+&lt;img src="slides_files/figure-html/demo9_user_2_output-1.png" width="864" /&gt;
+]
+
+---
+count: false
+ 
+#### Demo: Wrangling
+.left-panel-demo9-user[
+
+```r
+par(mar = c(0,0,0,0), mfrow = c(2,1))  
+plot(net, col = 'grey')  
+plot(  
+  sansebas,  
+  border = 'red', lwd = 2,  
+  col = NA, add = T  
+)  
+*plot(
+* st_filter(
+*   net,
+*   sansebas,
+*   .predicate = st_intersects
+* )
+*) 
+```
+]
+ 
+.right-panel-demo9-user[
+
+```
+although coordinates are longitude/latitude, st_intersects assumes that they are planar
+although coordinates are longitude/latitude, st_intersects assumes that they are planar
+```
+
+&lt;img src="slides_files/figure-html/demo9_user_3_output-1.png" width="864" /&gt;
+]
+
+&lt;style&gt;
+.left-panel-demo9-user {
+  color: #777;
+  width: 38.6138613861386%;
+  height: 92%;
+  float: left;
+  font-size: 80%
+}
+.right-panel-demo9-user {
+  width: 59.4059405940594%;
+  float: right;
+  padding-left: 1%;
+  font-size: 80%
+}
+.middle-panel-demo9-user {
+  width: 0%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+---
+count: false
+ 
+#### Demo: Wrangling
+.left-panel-demo10-user[
+
+```r
+# Con funciones de tidygraph
+*net %&gt;%
+* activate("nodes")
+```
+]
+ 
+.right-panel-demo10-user[
+
+```
+# A sfnetwork with 12283 nodes and 8999 edges
+#
+# CRS:  EPSG:4326 
+#
+# An undirected multigraph with 3646 components with spatially explicit edges
+#
+# Node Data:     12,283 x 1 (active)
+# Geometry type: POINT
+# Dimension:     XY
+# Bounding box:  xmin: -79.0708 ymin: -2.935008 xmax: -78.91145 ymax:
+#   -2.833441
+               geometry
+            &lt;POINT [°]&gt;
+1   (-79.028 -2.906154)
+2  (-79.02803 -2.90633)
+3 (-78.95973 -2.893506)
+4 (-78.96173 -2.893512)
+5 (-79.00801 -2.891764)
+6  (-79.00924 -2.89848)
+# ... with 12,277 more rows
+#
+# Edge Data:     8,999 x 9
+# Geometry type: LINESTRING
+# Dimension:     XY
+# Bounding box:  xmin: -79.08642 ymin: -2.960194 xmax: -78.90349
+#   ymax: -2.779669
+   from    to name  type  lanes oneway sidewalk surface
+  &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;  
+1     1     2 &lt;NA&gt;  resi~ &lt;NA&gt;  no     &lt;NA&gt;     &lt;NA&gt;   
+2     3     4 &lt;NA&gt;  trun~ 1     yes    right    asphalt
+3     5     6 Juan~ resi~ 2     yes    both     sett   
+# ... with 8,996 more rows, and 1 more variable: geometry &lt;LINESTRING
+#   [°]&gt;
+```
+]
+
+---
+count: false
+ 
+#### Demo: Wrangling
+.left-panel-demo10-user[
+
+```r
+# Con funciones de tidygraph
+net %&gt;%  
+  activate("nodes") %&gt;%  
+* mutate(centrality = centrality_betweenness())
+```
+]
+ 
+.right-panel-demo10-user[
+
+```
+# A sfnetwork with 12283 nodes and 8999 edges
+#
+# CRS:  EPSG:4326 
+#
+# An undirected multigraph with 3646 components with spatially explicit edges
+#
+# Node Data:     12,283 x 2 (active)
+# Geometry type: POINT
+# Dimension:     XY
+# Bounding box:  xmin: -79.0708 ymin: -2.935008 xmax: -78.91145 ymax:
+#   -2.833441
+               geometry centrality
+            &lt;POINT [°]&gt;      &lt;dbl&gt;
+1   (-79.028 -2.906154)          0
+2  (-79.02803 -2.90633)          0
+3 (-78.95973 -2.893506)       9171
+4 (-78.96173 -2.893512)      18332
+5 (-79.00801 -2.891764)      99891
+6  (-79.00924 -2.89848)     102884
+# ... with 12,277 more rows
+#
+# Edge Data:     8,999 x 9
+# Geometry type: LINESTRING
+# Dimension:     XY
+# Bounding box:  xmin: -79.08642 ymin: -2.960194 xmax: -78.90349
+#   ymax: -2.779669
+   from    to name  type  lanes oneway sidewalk surface
+  &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;  
+1     1     2 &lt;NA&gt;  resi~ &lt;NA&gt;  no     &lt;NA&gt;     &lt;NA&gt;   
+2     3     4 &lt;NA&gt;  trun~ 1     yes    right    asphalt
+3     5     6 Juan~ resi~ 2     yes    both     sett   
+# ... with 8,996 more rows, and 1 more variable: geometry &lt;LINESTRING
+#   [°]&gt;
+```
+]
+
+&lt;style&gt;
+.left-panel-demo10-user {
+  color: #777;
+  width: 38.6138613861386%;
+  height: 92%;
+  float: left;
+  font-size: 80%
+}
+.right-panel-demo10-user {
+  width: 59.4059405940594%;
+  float: right;
+  padding-left: 1%;
+  font-size: 80%
+}
+.middle-panel-demo10-user {
+  width: 0%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+---
+count: false
+ 
+#### Demo: Wrangling
+.left-panel-demo11-non_seq[
+
+```r
+# Funciones especificas para redes espaciales
+net %&gt;%  
+  activate("edges") %&gt;%  
+  select(to, from, geometry) %&gt;%  
+  mutate(  
+  )  
+```
+]
+ 
+.right-panel-demo11-non_seq[
+
+```
+# A sfnetwork with 12283 nodes and 8999 edges
+#
+# CRS:  EPSG:4326 
+#
+# An undirected multigraph with 3646 components with spatially explicit edges
+#
+# Edge Data:     8,999 x 3 (active)
+# Geometry type: LINESTRING
+# Dimension:     XY
+# Bounding box:  xmin: -79.08642 ymin: -2.960194 xmax: -78.90349
+#   ymax: -2.779669
+   from    to                                                 geometry
+  &lt;int&gt; &lt;int&gt;                                         &lt;LINESTRING [°]&gt;
+1     1     2                  (-79.028 -2.906154, -79.02803 -2.90633)
+2     3     4 (-78.95973 -2.893506, -78.96027 -2.893746, -78.96056 -2~
+3     5     6 (-79.00801 -2.891764, -79.00819 -2.892754, -79.00834 -2~
+4     7     8 (-79.01274 -2.894131, -79.01278 -2.894429, -79.01283 -2~
+5     9    10 (-79.01104 -2.891014, -79.01095 -2.890318, -79.01093 -2~
+6    11    12 (-79.03314 -2.906555, -79.03292 -2.906139, -79.03261 -2~
+# ... with 8,993 more rows
+#
+# Node Data:     12,283 x 1
+# Geometry type: POINT
+# Dimension:     XY
+# Bounding box:  xmin: -79.0708 ymin: -2.935008 xmax: -78.91145 ymax:
+#   -2.833441
+               geometry
+            &lt;POINT [°]&gt;
+1   (-79.028 -2.906154)
+2  (-79.02803 -2.90633)
+3 (-78.95973 -2.893506)
+# ... with 12,280 more rows
+```
+]
+
+---
+count: false
+ 
+#### Demo: Wrangling
+.left-panel-demo11-non_seq[
+
+```r
+# Funciones especificas para redes espaciales
+net %&gt;%  
+  activate("edges") %&gt;%  
+  select(to, from, geometry) %&gt;%  
+  mutate(  
+*   length = edge_length(),
+  )  
+```
+]
+ 
+.right-panel-demo11-non_seq[
+
+```
+# A sfnetwork with 12283 nodes and 8999 edges
+#
+# CRS:  EPSG:4326 
+#
+# An undirected multigraph with 3646 components with spatially explicit edges
+#
+# Edge Data:     8,999 x 4 (active)
+# Geometry type: LINESTRING
+# Dimension:     XY
+# Bounding box:  xmin: -79.08642 ymin: -2.960194 xmax: -78.90349
+#   ymax: -2.779669
+   from    to                                        geometry   length
+  &lt;int&gt; &lt;int&gt;                                &lt;LINESTRING [°]&gt;      [m]
+1     1     2         (-79.028 -2.906154, -79.02803 -2.90633)  19.663~
+2     3     4 (-78.95973 -2.893506, -78.96027 -2.893746, -78~ 241.638~
+3     5     6 (-79.00801 -2.891764, -79.00819 -2.892754, -79~ 757.311~
+4     7     8 (-79.01274 -2.894131, -79.01278 -2.894429, -79~ 138.144~
+5     9    10 (-79.01104 -2.891014, -79.01095 -2.890318, -79~ 271.476~
+6    11    12 (-79.03314 -2.906555, -79.03292 -2.906139, -79~ 347.195~
+# ... with 8,993 more rows
+#
+# Node Data:     12,283 x 1
+# Geometry type: POINT
+# Dimension:     XY
+# Bounding box:  xmin: -79.0708 ymin: -2.935008 xmax: -78.91145 ymax:
+#   -2.833441
+               geometry
+            &lt;POINT [°]&gt;
+1   (-79.028 -2.906154)
+2  (-79.02803 -2.90633)
+3 (-78.95973 -2.893506)
+# ... with 12,280 more rows
+```
+]
+
+---
+count: false
+ 
+#### Demo: Wrangling
+.left-panel-demo11-non_seq[
+
+```r
+# Funciones especificas para redes espaciales
+net %&gt;%  
+  activate("edges") %&gt;%  
+  select(to, from, geometry) %&gt;%  
+  mutate(  
+    length = edge_length(),  
+*   azimuth = edge_azimuth()
+  )  
+```
+]
+ 
+.right-panel-demo11-non_seq[
+
+```
+# A sfnetwork with 12283 nodes and 8999 edges
+#
+# CRS:  EPSG:4326 
+#
+# An undirected multigraph with 3646 components with spatially explicit edges
+#
+# Edge Data:     8,999 x 5 (active)
+# Geometry type: LINESTRING
+# Dimension:     XY
+# Bounding box:  xmin: -79.08642 ymin: -2.960194 xmax: -78.90349
+#   ymax: -2.779669
+   from    to                               geometry   length  azimuth
+  &lt;int&gt; &lt;int&gt;                       &lt;LINESTRING [°]&gt;      [m]    [rad]
+1     1     2 (-79.028 -2.906154, -79.02803 -2.9063~  19.663~ -2.9906~
+2     3     4 (-78.95973 -2.893506, -78.96027 -2.89~ 241.638~ -1.5740~
+3     5     6 (-79.00801 -2.891764, -79.00819 -2.89~ 757.311~ -2.9590~
+4     7     8 (-79.01274 -2.894131, -79.01278 -2.89~ 138.144~ -2.9463~
+5     9    10 (-79.01104 -2.891014, -79.01095 -2.89~ 271.476~ -0.1295~
+6    11    12 (-79.03314 -2.906555, -79.03292 -2.90~ 347.195~  0.5731~
+# ... with 8,993 more rows
+#
+# Node Data:     12,283 x 1
+# Geometry type: POINT
+# Dimension:     XY
+# Bounding box:  xmin: -79.0708 ymin: -2.935008 xmax: -78.91145 ymax:
+#   -2.833441
+               geometry
+            &lt;POINT [°]&gt;
+1   (-79.028 -2.906154)
+2  (-79.02803 -2.90633)
+3 (-78.95973 -2.893506)
+# ... with 12,280 more rows
+```
+]
+
+&lt;style&gt;
+.left-panel-demo11-non_seq {
+  color: #777;
+  width: 38.6138613861386%;
+  height: 92%;
+  float: left;
+  font-size: 80%
+}
+.right-panel-demo11-non_seq {
+  width: 59.4059405940594%;
+  float: right;
+  padding-left: 1%;
+  font-size: 80%
+}
+.middle-panel-demo11-non_seq {
+  width: 0%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+---
+count: false
+ 
+#### Demo: Preprocesamiento
+.left-panel-demo13-non_seq[
+
+```r
+net %&gt;%  
+  st_filter(gilramir, .predicate = st_intersects) %&gt;%  
+  plot()  
+```
+]
+ 
+.right-panel-demo13-non_seq[
+
+```
+although coordinates are longitude/latitude, st_intersects assumes that they are planar
+although coordinates are longitude/latitude, st_intersects assumes that they are planar
+```
+
+&lt;img src="slides_files/figure-html/demo13_non_seq_1_output-1.png" width="864" /&gt;
+]
+
+---
+count: false
+ 
+#### Demo: Preprocesamiento
+.left-panel-demo13-non_seq[
+
+```r
+net %&gt;%  
+  st_filter(gilramir, .predicate = st_intersects) %&gt;%  
+* convert(to_spatial_subdivision) %&gt;%
+  plot()  
+```
+]
+ 
+.right-panel-demo13-non_seq[
+
+```
+although coordinates are longitude/latitude, st_intersects assumes that they are planar
+although coordinates are longitude/latitude, st_intersects assumes that they are planar
+```
+
+&lt;img src="slides_files/figure-html/demo13_non_seq_2_output-1.png" width="864" /&gt;
+]
+
+---
+count: false
+ 
+#### Demo: Preprocesamiento
+.left-panel-demo13-non_seq[
+
+```r
+net %&gt;%  
+  st_filter(gilramir, .predicate = st_intersects) %&gt;%  
+  convert(to_spatial_subdivision) %&gt;%  
+* convert(to_spatial_smooth) %&gt;%
+  plot()  
+```
+]
+ 
+.right-panel-demo13-non_seq[
+
+```
+although coordinates are longitude/latitude, st_intersects assumes that they are planar
+although coordinates are longitude/latitude, st_intersects assumes that they are planar
+```
+
+&lt;img src="slides_files/figure-html/demo13_non_seq_3_output-1.png" width="864" /&gt;
+]
+
+---
+count: false
+ 
+#### Demo: Preprocesamiento
+.left-panel-demo13-non_seq[
+
+```r
+net %&gt;%  
+  st_filter(gilramir, .predicate = st_intersects) %&gt;%  
+  convert(to_spatial_subdivision) %&gt;%  
+  convert(to_spatial_smooth) %&gt;%  
+* convert(to_spatial_simple) %&gt;%
+  plot()  
+```
+]
+ 
+.right-panel-demo13-non_seq[
+
+```
+although coordinates are longitude/latitude, st_intersects assumes that they are planar
+although coordinates are longitude/latitude, st_intersects assumes that they are planar
+```
+
+&lt;img src="slides_files/figure-html/demo13_non_seq_4_output-1.png" width="864" /&gt;
+]
+
+&lt;style&gt;
+.left-panel-demo13-non_seq {
+  color: #777;
+  width: 38.6138613861386%;
+  height: 92%;
+  float: left;
+  font-size: 80%
+}
+.right-panel-demo13-non_seq {
+  width: 59.4059405940594%;
+  float: right;
+  padding-left: 1%;
+  font-size: 80%
+}
+.middle-panel-demo13-non_seq {
+  width: 0%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+---
+count: false
+ 
+#### Demo: Preprocesamiento
+.left-panel-demo14-user[
+
+```r
+*net
+```
+]
+ 
+.right-panel-demo14-user[
+
+```
+# A sfnetwork with 12283 nodes and 8999 edges
+#
+# CRS:  EPSG:4326 
+#
+# An undirected multigraph with 3646 components with spatially explicit edges
+#
+# Node Data:     12,283 x 1 (active)
+# Geometry type: POINT
+# Dimension:     XY
+# Bounding box:  xmin: -79.0708 ymin: -2.935008 xmax: -78.91145 ymax:
+#   -2.833441
+               geometry
+            &lt;POINT [°]&gt;
+1   (-79.028 -2.906154)
+2  (-79.02803 -2.90633)
+3 (-78.95973 -2.893506)
+4 (-78.96173 -2.893512)
+5 (-79.00801 -2.891764)
+6  (-79.00924 -2.89848)
+# ... with 12,277 more rows
+#
+# Edge Data:     8,999 x 9
+# Geometry type: LINESTRING
+# Dimension:     XY
+# Bounding box:  xmin: -79.08642 ymin: -2.960194 xmax: -78.90349
+#   ymax: -2.779669
+   from    to name  type  lanes oneway sidewalk surface
+  &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;  
+1     1     2 &lt;NA&gt;  resi~ &lt;NA&gt;  no     &lt;NA&gt;     &lt;NA&gt;   
+2     3     4 &lt;NA&gt;  trun~ 1     yes    right    asphalt
+3     5     6 Juan~ resi~ 2     yes    both     sett   
+# ... with 8,996 more rows, and 1 more variable: geometry &lt;LINESTRING
+#   [°]&gt;
+```
+]
+
+---
+count: false
+ 
+#### Demo: Preprocesamiento
+.left-panel-demo14-user[
+
+```r
+net %&gt;%  
+* convert(to_spatial_subdivision) %&gt;%
+* convert(to_spatial_smooth) %&gt;%
+* convert(to_spatial_simple)
+```
+]
+ 
+.right-panel-demo14-user[
+
+```
+# A sfnetwork with 11799 nodes and 15772 edges
+#
+# CRS:  EPSG:4326 
+#
+# An undirected simple graph with 125 components with spatially explicit edges
+#
+# Node Data:     11,799 x 2 (active)
+# Geometry type: POINT
+# Dimension:     XY
+# Bounding box:  xmin: -79.0708 ymin: -2.934974 xmax: -78.91145 ymax:
+#   -2.833441
+               geometry .tidygraph_node_index
+            &lt;POINT [°]&gt;                 &lt;int&gt;
+1   (-79.028 -2.906154)                     1
+2  (-79.02803 -2.90633)                     2
+3 (-78.96027 -2.893746)                     3
+4 (-78.96173 -2.893512)                     4
+5 (-79.00801 -2.891764)                     5
+6 (-79.00819 -2.892754)                     6
+# ... with 11,793 more rows
+#
+# Edge Data:     15,772 x 10
+# Geometry type: LINESTRING
+# Dimension:     XY
+# Bounding box:  xmin: -79.0708 ymin: -2.935125 xmax: -78.91145 ymax:
+#   -2.833441
+   from    to name  type  lanes oneway sidewalk surface
+  &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;  
+1     1     2 &lt;NA&gt;  resi~ &lt;NA&gt;  no     &lt;NA&gt;     &lt;NA&gt;   
+2     3     4 &lt;NA&gt;  trun~ 1     yes    right    asphalt
+3     5     6 Juan~ resi~ 2     yes    both     sett   
+# ... with 15,769 more rows, and 2 more variables:
+#   geometry &lt;LINESTRING [°]&gt;, .tidygraph_edge_index &lt;int&gt;
+```
+]
+
+---
+count: false
+ 
+#### Demo: Preprocesamiento
+.left-panel-demo14-user[
+
+```r
+net %&gt;%  
+  convert(to_spatial_subdivision) %&gt;%  
+  convert(to_spatial_smooth) %&gt;%  
+  convert(to_spatial_simple) -&gt;  
+* net_clean
+```
+]
+ 
+.right-panel-demo14-user[
+
+]
+
+&lt;style&gt;
+.left-panel-demo14-user {
+  color: #777;
+  width: 38.6138613861386%;
+  height: 92%;
+  float: left;
+  font-size: 80%
+}
+.right-panel-demo14-user {
+  width: 59.4059405940594%;
+  float: right;
+  padding-left: 1%;
+  font-size: 80%
+}
+.middle-panel-demo14-user {
+  width: 0%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+---
+count: false
+ 
+#### Demo: Ruteo
+.left-panel-demo15-user[
+
+```r
+*parque = st_sfc(st_point(c(-79.0044, -2.8977)), crs = 4326)
+*artes = st_sfc(st_point(c(-79.0252, -2.9203)), crs= 4326)
+*estadio = st_sfc(st_point(c(-79.00586, -2.90672)), crs= 4326)
+```
+]
+ 
+.right-panel-demo15-user[
+
+]
+
+---
+count: false
+ 
+#### Demo: Ruteo
+.left-panel-demo15-user[
+
+```r
+parque = st_sfc(st_point(c(-79.0044, -2.8977)), crs = 4326)  
+artes = st_sfc(st_point(c(-79.0252, -2.9203)), crs= 4326)  
+estadio = st_sfc(st_point(c(-79.00586, -2.90672)), crs= 4326)  
+
+*st_network_paths(
+* net_clean,
+* from = parque,
+* to = c(artes,estadio)
+*) 
+```
+]
+ 
+.right-panel-demo15-user[
+
+```
+although coordinates are longitude/latitude, st_nearest_points assumes that they are planar
+although coordinates are longitude/latitude, st_nearest_points assumes that they are planar
+```
+
+```
+# A tibble: 2 x 2
+  node_paths edge_paths
+  &lt;list&gt;     &lt;list&gt;    
+1 &lt;int [66]&gt; &lt;int [65]&gt;
+2 &lt;int [22]&gt; &lt;int [21]&gt;
+```
+]
+
+---
+count: false
+ 
+#### Demo: Ruteo
+.left-panel-demo15-user[
+
+```r
+parque = st_sfc(st_point(c(-79.0044, -2.8977)), crs = 4326)  
+artes = st_sfc(st_point(c(-79.0252, -2.9203)), crs= 4326)  
+estadio = st_sfc(st_point(c(-79.00586, -2.90672)), crs= 4326)  
+
+st_network_paths(  
+  net_clean,  
+  from = parque,  
+  to = c(artes,estadio)  
+) -&gt;  
+* paths
+
+*paths %&gt;%
+* pull(node_paths) %&gt;%
+* unlist()
+```
+]
+ 
+.right-panel-demo15-user[
+
+```
+although coordinates are longitude/latitude, st_nearest_points assumes that they are planar
+although coordinates are longitude/latitude, st_nearest_points assumes that they are planar
+```
+
+```
+ [1] 11045  8088  8087  8078   238   278  2629  6777  6205  6775  6776
+[12]   205 10276 10384  8955  1063  1062  3885   675   676  2646  1085
+[23]  1097  6250  8761  9982  2034   617   646   684   638   606  6778
+[34]   559   560   561  9640   247   248  4213  3791  3818  3761  4913
+[45]  4911  4857  4603  3764  6316  4898  6324  8100  4897  4841  3835
+[56]  3834 10931  4842  4893  4892  4891  4826   717   716  7503  7504
+[67] 11045  8088  8087  8078   238   278  2629  6777  6205  6775  6776
+[78]   205  2038  8789  8788   817   821   793  8787   214   213  8785
+```
+]
+
+&lt;style&gt;
+.left-panel-demo15-user {
+  color: #777;
+  width: 38.6138613861386%;
+  height: 92%;
+  float: left;
+  font-size: 80%
+}
+.right-panel-demo15-user {
+  width: 59.4059405940594%;
+  float: right;
+  padding-left: 1%;
+  font-size: 80%
+}
+.middle-panel-demo15-user {
+  width: 0%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+---
+count: false
+ 
+#### Demo: Ruteo
+.left-panel-demo18-user[
+
+```r
+*plot_path = function(node_path) {
+* net_clean %&gt;%
+*   activate("nodes") %&gt;%
+*   slice(node_path) %&gt;%
+*   plot(cex = 1.5, lwd = 1.5, add = TRUE)
+*} 
+```
+]
+ 
+.right-panel-demo18-user[
+
+]
+
+---
+count: false
+ 
+#### Demo: Ruteo
+.left-panel-demo18-user[
+
+```r
+plot_path = function(node_path) {  
+  net_clean %&gt;%  
+    activate("nodes") %&gt;%  
+    slice(node_path) %&gt;%  
+    plot(cex = 1.5, lwd = 1.5, add = TRUE)  
+}  
+
+*par(mar = c(0,0,0,0), mfrow = c(1,1))
+*plot(net_clean, col = 'grey')
+```
+]
+ 
+.right-panel-demo18-user[
+&lt;img src="slides_files/figure-html/demo18_user_2_output-1.png" width="864" /&gt;
+]
+
+---
+count: false
+ 
+#### Demo: Ruteo
+.left-panel-demo18-user[
+
+```r
+plot_path = function(node_path) {  
+  net_clean %&gt;%  
+    activate("nodes") %&gt;%  
+    slice(node_path) %&gt;%  
+    plot(cex = 1.5, lwd = 1.5, add = TRUE)  
+}  
+
+par(mar = c(0,0,0,0), mfrow = c(1,1))  
+plot(net_clean, col = 'grey')  
+*plot(parque, col = "blue", pch = 8, add = T)
+*plot(artes, col = "red", pch = 8, add = T)
+*plot(estadio, col = "orange", pch = 8, add = T)
+```
+]
+ 
+.right-panel-demo18-user[
+&lt;img src="slides_files/figure-html/demo18_user_3_output-1.png" width="864" /&gt;
+]
+
+---
+count: false
+ 
+#### Demo: Ruteo
+.left-panel-demo18-user[
+
+```r
+plot_path = function(node_path) {  
+  net_clean %&gt;%  
+    activate("nodes") %&gt;%  
+    slice(node_path) %&gt;%  
+    plot(cex = 1.5, lwd = 1.5, add = TRUE)  
+}  
+
+par(mar = c(0,0,0,0), mfrow = c(1,1))  
+plot(net_clean, col = 'grey')  
+plot(parque, col = "blue", pch = 8, add = T)  
+plot(artes, col = "red", pch = 8, add = T)  
+plot(estadio, col = "orange", pch = 8, add = T)  
+*paths %&gt;%
+* pull(node_paths) %&gt;%
+* purrr::walk(plot_path)
+```
+]
+ 
+.right-panel-demo18-user[
+&lt;img src="slides_files/figure-html/demo18_user_4_output-1.png" width="864" /&gt;
+]
+
+&lt;style&gt;
+.left-panel-demo18-user {
+  color: #777;
+  width: 38.6138613861386%;
+  height: 92%;
+  float: left;
+  font-size: 80%
+}
+.right-panel-demo18-user {
+  width: 59.4059405940594%;
+  float: right;
+  padding-left: 1%;
+  font-size: 80%
+}
+.middle-panel-demo18-user {
+  width: 0%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+---
+count: false
+ 
+#### Demo: Isocronas
+.left-panel-demo16-user[
+
+```r
+*net_clean %&gt;%
+* activate("edges") %&gt;%
+* pull(type) %&gt;%
+* unique()
+```
+]
+ 
+.right-panel-demo16-user[
+
+```
+ [1] "residential"    "trunk_link"     "primary"       
+ [4] "secondary"      "tertiary"       "trunk"         
+ [7] "cycleway"       "secondary_link" "steps"         
+[10] "pedestrian"     "primary_link"   "living_street" 
+[13] "footway"        "path"           "service"       
+[16] "track"          "unclassified"   "tertiary_link" 
+[19] NA              
+```
+]
+
+---
+count: false
+ 
+#### Demo: Isocronas
+.left-panel-demo16-user[
+
+```r
+net_clean %&gt;%  
+  activate("edges") %&gt;%  
+  pull(type) %&gt;%  
+  unique() -&gt;  
+* types
+
+# Randomly define a walking speed in m/s for each type,
+# with values between 3 and 7 km/h.
+*set.seed(1)
+*speeds = runif(
+* length(types),
+* 3 * 1000 / 60 / 60,
+* 7 * 1000 / 60 / 60
+*) 
+```
+]
+ 
+.right-panel-demo16-user[
+
+]
+
+---
+count: false
+ 
+#### Demo: Isocronas
+.left-panel-demo16-user[
+
+```r
+net_clean %&gt;%  
+  activate("edges") %&gt;%  
+  pull(type) %&gt;%  
+  unique() -&gt;  
+  types  
+
+# Randomly define a walking speed in m/s for each type,
+# with values between 3 and 7 km/h.
+set.seed(1)  
+speeds = runif(  
+  length(types),  
+  3 * 1000 / 60 / 60,  
+  7 * 1000 / 60 / 60  
+)  
+
+# Assign a speed to each edge based on its type.
+# Calculate travel time for each edge based on that.
+*net_clean %&gt;%
+* activate("edges") %&gt;%
+* select(type) %&gt;%
+* mutate(weight = edge_length()) %&gt;%
+* group_by(type) %&gt;%
+* mutate(speed = units::set_units(speeds[cur_group_id()], "m/s")) %&gt;%
+* mutate(time = weight / speed) %&gt;%
+* ungroup()
+```
+]
+ 
+.right-panel-demo16-user[
+
+```
+# A sfnetwork with 11799 nodes and 15772 edges
+#
+# CRS:  EPSG:4326 
+#
+# An undirected simple graph with 125 components with spatially explicit edges
+#
+# Edge Data:     15,772 x 7 (active)
+# Geometry type: LINESTRING
+# Dimension:     XY
+# Bounding box:  xmin: -79.0708 ymin: -2.935125 xmax: -78.91145 ymax:
+#   -2.833441
+   from    to type                   geometry   weight    speed
+  &lt;int&gt; &lt;int&gt; &lt;chr&gt;          &lt;LINESTRING [°]&gt;      [m]    [m/s]
+1     1     2 resi~ (-79.028 -2.906154, -79.~  19.663~ 1.567553
+2     3     4 trun~ (-78.96027 -2.893746, -7~ 176.811~ 1.630687
+3     5     6 resi~ (-79.00801 -2.891764, -7~ 111.254~ 1.567553
+4     6     7 resi~ (-79.00819 -2.892754, -7~ 115.074~ 1.567553
+5     7     8 resi~ (-79.00834 -2.893783, -7~   3.983~ 1.567553
+6     8     9 resi~ (-79.00837 -2.893797, -7~ 114.482~ 1.567553
+# ... with 15,766 more rows, and 1 more variable: time [s]
+#
+# Node Data:     11,799 x 2
+# Geometry type: POINT
+# Dimension:     XY
+# Bounding box:  xmin: -79.0708 ymin: -2.934974 xmax: -78.91145 ymax:
+#   -2.833441
+               geometry .tidygraph_node_index
+            &lt;POINT [°]&gt;                 &lt;int&gt;
+1   (-79.028 -2.906154)                     1
+2  (-79.02803 -2.90633)                     2
+3 (-78.96027 -2.893746)                     3
+# ... with 11,796 more rows
+```
+]
+
+---
+count: false
+ 
+#### Demo: Isocronas
+.left-panel-demo16-user[
+
+```r
+net_clean %&gt;%  
+  activate("edges") %&gt;%  
+  pull(type) %&gt;%  
+  unique() -&gt;  
+  types  
+
+# Randomly define a walking speed in m/s for each type,
+# with values between 3 and 7 km/h.
+set.seed(1)  
+speeds = runif(  
+  length(types),  
+  3 * 1000 / 60 / 60,  
+  7 * 1000 / 60 / 60  
+)  
+
+# Assign a speed to each edge based on its type.
+# Calculate travel time for each edge based on that.
+net_clean %&gt;%  
+  activate("edges") %&gt;%  
+  select(type) %&gt;%  
+  mutate(weight = edge_length()) %&gt;%  
+  group_by(type) %&gt;%  
+  mutate(speed = units::set_units(speeds[cur_group_id()], "m/s")) %&gt;%  
+  mutate(time = weight / speed) %&gt;%  
+  ungroup() %&gt;%  
+* activate("nodes") -&gt;
+* net_clean
+```
+]
+ 
+.right-panel-demo16-user[
+
+]
+
+&lt;style&gt;
+.left-panel-demo16-user {
+  color: #777;
+  width: 38.6138613861386%;
+  height: 92%;
+  float: left;
+  font-size: 80%
+}
+.right-panel-demo16-user {
+  width: 59.4059405940594%;
+  float: right;
+  padding-left: 1%;
+  font-size: 80%
+}
+.middle-panel-demo16-user {
+  width: 0%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+---
+count: false
+ 
+#### Demo: Isocronas
+.left-panel-demo17-user[
+
+```r
+*net_clean %&gt;%
+* filter(
+*   node_distance_from(
+*     st_nearest_feature(parque, net_clean),
+*     weights = time) &lt;= 600
+* )
+```
+]
+ 
+.right-panel-demo17-user[
+
+```
+although coordinates are longitude/latitude, st_nearest_points assumes that they are planar
+```
+
+```
+# A sfnetwork with 343 nodes and 494 edges
+#
+# CRS:  EPSG:4326 
+#
+# An undirected simple graph with 1 component with spatially explicit edges
+#
+# Node Data:     343 x 2 (active)
+# Geometry type: POINT
+# Dimension:     XY
+# Bounding box:  xmin: -79.01202 ymin: -2.90453 xmax: -78.99676 ymax:
+#   -2.889817
+               geometry .tidygraph_node_index
+            &lt;POINT [°]&gt;                 &lt;int&gt;
+1 (-79.00834 -2.893783)                     7
+2 (-79.00837 -2.893797)                     8
+3 (-79.00857 -2.894813)                     9
+4 (-79.00875 -2.895823)                    10
+5 (-79.00892 -2.896779)                    11
+6 (-79.00911 -2.897794)                    12
+# ... with 337 more rows
+#
+# Edge Data:     494 x 7
+# Geometry type: LINESTRING
+# Dimension:     XY
+# Bounding box:  xmin: -79.01202 ymin: -2.90453 xmax: -78.99676 ymax:
+#   -2.889817
+   from    to type                   geometry   weight    speed
+  &lt;int&gt; &lt;int&gt; &lt;chr&gt;          &lt;LINESTRING [°]&gt;      [m]    [m/s]
+1     1     2 resi~ (-79.00834 -2.893783, -7~   3.983~ 1.567553
+2     2     3 resi~ (-79.00837 -2.893797, -7~ 114.482~ 1.567553
+3     3     4 resi~ (-79.00857 -2.894813, -7~ 113.555~ 1.567553
+# ... with 491 more rows, and 1 more variable: time [s]
+```
+]
+
+---
+count: false
+ 
+#### Demo: Isocronas
+.left-panel-demo17-user[
+
+```r
+net_clean %&gt;%  
+  filter(  
+    node_distance_from(  
+      st_nearest_feature(parque, net_clean),  
+      weights = time) &lt;= 600  
+  ) -&gt;  
+* iso
+
+*iso_poly = iso %&gt;%
+* st_geometry() %&gt;%
+* st_union() %&gt;%
+* st_convex_hull()
+```
+]
+ 
+.right-panel-demo17-user[
+
+```
+although coordinates are longitude/latitude, st_nearest_points assumes that they are planar
+```
+
+```
+although coordinates are longitude/latitude, st_union assumes that they are planar
+```
+]
+
+---
+count: false
+ 
+#### Demo: Isocronas
+.left-panel-demo17-user[
+
+```r
+net_clean %&gt;%  
+  filter(  
+    node_distance_from(  
+      st_nearest_feature(parque, net_clean),  
+      weights = time) &lt;= 600  
+  ) -&gt;  
+  iso  
+
+iso_poly = iso %&gt;%  
+  st_geometry() %&gt;%  
+  st_union() %&gt;%  
+  st_convex_hull()  
+
+*par(mar = c(0,0,0,0), mfrow = c(1,1))
+*plot(net_clean, col = "grey")
+```
+]
+ 
+.right-panel-demo17-user[
+
+```
+although coordinates are longitude/latitude, st_nearest_points assumes that they are planar
+```
+
+```
+although coordinates are longitude/latitude, st_union assumes that they are planar
+```
+
+&lt;img src="slides_files/figure-html/demo17_user_3_output-1.png" width="864" /&gt;
+]
+
+---
+count: false
+ 
+#### Demo: Isocronas
+.left-panel-demo17-user[
+
+```r
+net_clean %&gt;%  
+  filter(  
+    node_distance_from(  
+      st_nearest_feature(parque, net_clean),  
+      weights = time) &lt;= 600  
+  ) -&gt;  
+  iso  
+
+iso_poly = iso %&gt;%  
+  st_geometry() %&gt;%  
+  st_union() %&gt;%  
+  st_convex_hull()  
+
+par(mar = c(0,0,0,0), mfrow = c(1,1))  
+plot(net_clean, col = "grey")  
+*plot(
+* iso_poly,
+* col = NA, border = "black",
+* lwd = 3, add = TRUE)
+```
+]
+ 
+.right-panel-demo17-user[
+
+```
+although coordinates are longitude/latitude, st_nearest_points assumes that they are planar
+```
+
+```
+although coordinates are longitude/latitude, st_union assumes that they are planar
+```
+
+&lt;img src="slides_files/figure-html/demo17_user_4_output-1.png" width="864" /&gt;
+]
+
+---
+count: false
+ 
+#### Demo: Isocronas
+.left-panel-demo17-user[
+
+```r
+net_clean %&gt;%  
+  filter(  
+    node_distance_from(  
+      st_nearest_feature(parque, net_clean),  
+      weights = time) &lt;= 600  
+  ) -&gt;  
+  iso  
+
+iso_poly = iso %&gt;%  
+  st_geometry() %&gt;%  
+  st_union() %&gt;%  
+  st_convex_hull()  
+
+par(mar = c(0,0,0,0), mfrow = c(1,1))  
+plot(net_clean, col = "grey")  
+plot(  
+  iso_poly,  
+  col = NA, border = "black",  
+  lwd = 3, add = TRUE)  
+*plot(iso,
+*    col = "lightsalmon",
+*    add = TRUE)
+```
+]
+ 
+.right-panel-demo17-user[
+
+```
+although coordinates are longitude/latitude, st_nearest_points assumes that they are planar
+```
+
+```
+although coordinates are longitude/latitude, st_union assumes that they are planar
+```
+
+&lt;img src="slides_files/figure-html/demo17_user_5_output-1.png" width="864" /&gt;
+]
+
+---
+count: false
+ 
+#### Demo: Isocronas
+.left-panel-demo17-user[
+
+```r
+net_clean %&gt;%  
+  filter(  
+    node_distance_from(  
+      st_nearest_feature(parque, net_clean),  
+      weights = time) &lt;= 600  
+  ) -&gt;  
+  iso  
+
+iso_poly = iso %&gt;%  
+  st_geometry() %&gt;%  
+  st_union() %&gt;%  
+  st_convex_hull()  
+
+par(mar = c(0,0,0,0), mfrow = c(1,1))  
+plot(net_clean, col = "grey")  
+plot(  
+  iso_poly,  
+  col = NA, border = "black",  
+  lwd = 3, add = TRUE)  
+plot(iso,  
+     col = "lightsalmon",  
+     add = TRUE)  
+*plot(parque, col = "blue",
+*    pch = 8, cex = 2,
+*    lwd = 2, add = TRUE)
+```
+]
+ 
+.right-panel-demo17-user[
+
+```
+although coordinates are longitude/latitude, st_nearest_points assumes that they are planar
+```
+
+```
+although coordinates are longitude/latitude, st_union assumes that they are planar
+```
+
+&lt;img src="slides_files/figure-html/demo17_user_6_output-1.png" width="864" /&gt;
+]
+
+&lt;style&gt;
+.left-panel-demo17-user {
+  color: #777;
+  width: 38.6138613861386%;
+  height: 92%;
+  float: left;
+  font-size: 80%
+}
+.right-panel-demo17-user {
+  width: 59.4059405940594%;
+  float: right;
+  padding-left: 1%;
+  font-size: 80%
+}
+.middle-panel-demo17-user {
+  width: 0%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+---
+count: false
+ 
+#### Demo: Detección de comunidades
+.left-panel-demo12-user[
+
+```r
+*net_clean
+```
+]
+ 
+.right-panel-demo12-user[
+
+```
+# A sfnetwork with 11799 nodes and 15772 edges
+#
+# CRS:  EPSG:4326 
+#
+# An undirected simple graph with 125 components with spatially explicit edges
+#
+# Node Data:     11,799 x 2 (active)
+# Geometry type: POINT
+# Dimension:     XY
+# Bounding box:  xmin: -79.0708 ymin: -2.934974 xmax: -78.91145 ymax:
+#   -2.833441
+               geometry .tidygraph_node_index
+            &lt;POINT [°]&gt;                 &lt;int&gt;
+1   (-79.028 -2.906154)                     1
+2  (-79.02803 -2.90633)                     2
+3 (-78.96027 -2.893746)                     3
+4 (-78.96173 -2.893512)                     4
+5 (-79.00801 -2.891764)                     5
+6 (-79.00819 -2.892754)                     6
+# ... with 11,793 more rows
+#
+# Edge Data:     15,772 x 10
+# Geometry type: LINESTRING
+# Dimension:     XY
+# Bounding box:  xmin: -79.0708 ymin: -2.935125 xmax: -78.91145 ymax:
+#   -2.833441
+   from    to name  type  lanes oneway sidewalk surface
+  &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;  
+1     1     2 &lt;NA&gt;  resi~ &lt;NA&gt;  no     &lt;NA&gt;     &lt;NA&gt;   
+2     3     4 &lt;NA&gt;  trun~ 1     yes    right    asphalt
+3     5     6 Juan~ resi~ 2     yes    both     sett   
+# ... with 15,769 more rows, and 2 more variables:
+#   geometry &lt;LINESTRING [°]&gt;, .tidygraph_edge_index &lt;int&gt;
+```
+]
+
+---
+count: false
+ 
+#### Demo: Detección de comunidades
+.left-panel-demo12-user[
+
+```r
+net_clean %&gt;%  
+* morph(to_linegraph)
+```
+]
+ 
+.right-panel-demo12-user[
+
+```
+# A tbl_graph temporarily morphed to a linegraph representation
+# 
+# Original graph is an undirected simple graph with 125 components
+# consisting of 11799 nodes and 15772 edges
+```
+]
+
+---
+count: false
+ 
+#### Demo: Detección de comunidades
+.left-panel-demo12-user[
+
+```r
+net_clean %&gt;%  
+  morph(to_linegraph) %&gt;%  
+* mutate(group = group_louvain())
+```
+]
+ 
+.right-panel-demo12-user[
+
+```
+# A tbl_graph temporarily morphed to a linegraph representation
+# 
+# Original graph is an undirected simple graph with 125 components
+# consisting of 11799 nodes and 15772 edges
+```
+]
+
+---
+count: false
+ 
+#### Demo: Detección de comunidades
+.left-panel-demo12-user[
+
+```r
+net_clean %&gt;%  
+  morph(to_linegraph) %&gt;%  
+  mutate(group = group_louvain()) %&gt;%  
+* unmorph()
+```
+]
+ 
+.right-panel-demo12-user[
+
+```
+# A sfnetwork with 11799 nodes and 15772 edges
+#
+# CRS:  EPSG:4326 
+#
+# An undirected simple graph with 125 components with spatially explicit edges
+#
+# Node Data:     11,799 x 1 (active)
+# Geometry type: POINT
+# Dimension:     XY
+# Bounding box:  xmin: -79.0708 ymin: -2.934974 xmax: -78.91145 ymax:
+#   -2.833441
+               geometry
+            &lt;POINT [°]&gt;
+1   (-79.028 -2.906154)
+2  (-79.02803 -2.90633)
+3 (-78.96027 -2.893746)
+4 (-78.96173 -2.893512)
+5 (-79.00801 -2.891764)
+6 (-79.00819 -2.892754)
+# ... with 11,793 more rows
+#
+# Edge Data:     15,772 x 10
+# Geometry type: LINESTRING
+# Dimension:     XY
+# Bounding box:  xmin: -79.0708 ymin: -2.935125 xmax: -78.91145 ymax:
+#   -2.833441
+   from    to name  type  lanes oneway sidewalk surface
+  &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;  
+1     1     2 &lt;NA&gt;  resi~ &lt;NA&gt;  no     &lt;NA&gt;     &lt;NA&gt;   
+2     3     4 &lt;NA&gt;  trun~ 1     yes    right    asphalt
+3     5     6 Juan~ resi~ 2     yes    both     sett   
+# ... with 15,769 more rows, and 2 more variables:
+#   geometry &lt;LINESTRING [°]&gt;, group &lt;int&gt;
+```
+]
+
+---
+count: false
+ 
+#### Demo: Detección de comunidades
+.left-panel-demo12-user[
+
+```r
+net_clean %&gt;%  
+  morph(to_linegraph) %&gt;%  
+  mutate(group = group_louvain()) %&gt;%  
+  unmorph() -&gt;  
+* grouped_net
+
+*grouped_net %&gt;%
+* activate("edges") %&gt;%
+* pull(group) %&gt;%
+* unique() %&gt;%
+* length()
+```
+]
+ 
+.right-panel-demo12-user[
+
+```
+[1] 186
+```
+]
+
+---
+count: false
+ 
+#### Demo: Detección de comunidades
+.left-panel-demo12-user[
+
+```r
+net_clean %&gt;%  
+  morph(to_linegraph) %&gt;%  
+  mutate(group = group_louvain()) %&gt;%  
+  unmorph() -&gt;  
+  grouped_net  
+
+grouped_net %&gt;%  
+  activate("edges") %&gt;%  
+  pull(group) %&gt;%  
+  unique() %&gt;%  
+  length()  
+
+*par(mar = c(0,0,0,0), mfrow = c(1,1))
+*plot(
+* st_geometry(net, "edges"),
+* col = "grey", lwd = 0.5
+*) 
+```
+]
+ 
+.right-panel-demo12-user[
+
+```
+[1] 186
+```
+
+&lt;img src="slides_files/figure-html/demo12_user_6_output-1.png" width="864" /&gt;
+]
+
+---
+count: false
+ 
+#### Demo: Detección de comunidades
+.left-panel-demo12-user[
+
+```r
+net_clean %&gt;%  
+  morph(to_linegraph) %&gt;%  
+  mutate(group = group_louvain()) %&gt;%  
+  unmorph() -&gt;  
+  grouped_net  
+
+grouped_net %&gt;%  
+  activate("edges") %&gt;%  
+  pull(group) %&gt;%  
+  unique() %&gt;%  
+  length()  
+
+par(mar = c(0,0,0,0), mfrow = c(1,1))  
+plot(  
+  st_geometry(net, "edges"),  
+  col = "grey", lwd = 0.5  
+)  
+
+*grouped_net %&gt;%
+* activate("edges") %&gt;%
+* st_as_sf() %&gt;%
+* transmute(group = as.factor(group)) %&gt;%
+* filter(group %in% c(1:20)) %&gt;%
+* plot(lwd = 4, add = TRUE)
+```
+]
+ 
+.right-panel-demo12-user[
+
+```
+[1] 186
+```
+
+&lt;img src="slides_files/figure-html/demo12_user_7_output-1.png" width="864" /&gt;
+]
+
+&lt;style&gt;
+.left-panel-demo12-user {
+  color: #777;
+  width: 38.6138613861386%;
+  height: 92%;
+  float: left;
+  font-size: 80%
+}
+.right-panel-demo12-user {
+  width: 59.4059405940594%;
+  float: right;
+  padding-left: 1%;
+  font-size: 80%
+}
+.middle-panel-demo12-user {
+  width: 0%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+---
+class: center, middle
+
+### ¿Quieren más?
+
+--
+
+Pueden encontrar documentación y más ejemplos en la [página del paquete](https://luukvdmeer.github.io/sfnetworks/index.html)
+
+--
+
+### ¿Tienen sus propios ejemplos o ideas sobre el paquete?
+
+--
+
+Unánse a la [Discusión en GitHub](https://github.com/luukvdmeer/sfnetworks/discussions)
+
+--
+
+### ¿Encontraron un bug?
+
+--
+
+Hágannos saber en un [issue aquí](https://github.com/luukvdmeer/sfnetworks/issues)!
+
+
+---
+class: center, middle
+
+### ¡Gracias por su atención!
+
+#### ¿Preguntas?
+
+.note[.pull-left[Proyecto financiado por:&lt;br&gt;![:scale 50%](https://raw.githubusercontent.com/RConsortium/artwork/main/r_consortium/R_Consortium-logo-horizontal-color.png)]
+
+.pull-right[Presentación construida con [xaringan](https://github.com/yihui/xaringan), [xaringanthemer](https://github.com/gadenbuie/xaringanthemer) y [flipbookr](https://github.com/EvaMaeRey/flipbookr)]]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="https://platform.twitter.com/widgets.js"></script>
+<script src="macro.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+<style>
+.logo {
+  background-image: url(figs/logo.png);
+  background-size: contain;
+  background-repeat: no-repeat;
+  position: absolute;
+  top: 1em;
+  right: 1em;
+  width: 110px;
+  height: 128px;
+  z-index: 0;
+}
+</style>
+
+<script>
+document
+  .querySelectorAll(
+    '.remark-slide-content' +
+    ':not(.title-slide)' +
+    // add additional classes to exclude here, e.g.
+    // ':not(.inverse)' +
+    ':not(.hide-logo)'
+  )
+  .forEach(el => {
+    el.innerHTML += '<div class="logo"></div>';
+  });
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
