@@ -1,0 +1,18 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# sfnetworks-REspacialES
+
+En este repositorio encuentran el [código fuente](slides.Rmd) de la charla "Introducción al paquete {sfnetworks}" para la comunidad [R Espacial ES](https://rspatial_es.gitlab.io/). 
+
+Las diapositivas las pueden encontrar [aquí](https://sfnetworks.github.io/sfnetworks-REspacialES/slides) y la grabación de la charla [aquí](https://www.youtube.com/watch?v=jKRmsOjguqo). 
